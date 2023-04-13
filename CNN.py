@@ -9,6 +9,7 @@
 import copy
 import os
 import random
+import argparse
 
 import numpy as np
 import torch
@@ -22,6 +23,11 @@ import torch.nn.functional as F
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument("--test", required=False, default='True')
+parser.add_argument("--train", required=False, default='True')
+args = vars(parser.parse_args())
+print("command-line:", args)
 
 def setup_seed(seed):
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -140,10 +146,11 @@ def train():
 
     torch.save(best_model.state_dict(), "model/cnn.pkl")
 
+def isTrue(arg):
+    return arg in ['True', 'true', True]
 
 def test():
     Dtr, Val, Dte = load_data()
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = cnn().to(device)
     model.load_state_dict(torch.load("model/cnn.pkl"), False)
     model.eval()
@@ -160,5 +167,7 @@ def test():
 
 
 if __name__ == '__main__':
-    train()
-    test()
+    if isTrue(args['train']):
+        train()
+    if isTrue(args['test']):
+        test()
